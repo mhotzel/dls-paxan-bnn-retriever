@@ -3,6 +3,7 @@ from os.path import join
 from datetime import date, datetime
 import sys
 from configparser import ConfigParser
+from pathlib import Path
 
 
 def list_writer(liste: list, row: str) -> None:
@@ -46,14 +47,15 @@ def retreive_header(first_row: str) -> dict:
 
 
 def read_config() -> ConfigParser:
+    app_dir = Path(__file__).parent
     cfg_parser = ConfigParser()
-    with open("config.ini") as file:
+    with open(join(app_dir, "config.ini")) as file:
         cfg_parser.read_file(file)
     return cfg_parser
 
 
 def main() -> None:
-
+    print(f"{str(datetime.now())} - Start Abholung Paxan-Artikeldatei")
     cfg = read_config()
     host = cfg.get('paxan', 'host')
     user = cfg.get('paxan', 'user')
@@ -81,7 +83,7 @@ def main() -> None:
         for line in result_list:
             file.write(line + '\n')
 
-    print(f"Fertig")
+    print(f"{str(datetime.now())} - Fertig")
 
 
 if __name__ == '__main__':
