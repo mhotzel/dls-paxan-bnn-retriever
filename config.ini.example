@@ -3,6 +3,7 @@
 
 [DEFAULT]
 target_dir = data/in
+protocol_file = data/out/paxan-abholer.log
 
 [paxan]
 # you get the credentials directly from paxan.

@@ -55,7 +55,6 @@ def read_config() -> ConfigParser:
 
 
 def main() -> None:
-    print(f"{str(datetime.now())} - Start Abholung Paxan-Artikeldatei")
     cfg = read_config()
     host = cfg.get('paxan', 'host')
     user = cfg.get('paxan', 'user')
@@ -64,26 +63,29 @@ def main() -> None:
     filename_on_server = cfg.get('paxan', 'source_filename')
     target_filename = cfg.get('paxan', 'target_filename')
     target_dir = cfg.get('paxan', 'target_dir')
+    protocol_file = cfg.get('paxan', 'protocol_file')
 
-    client = FTP(host=host, user=user, passwd=password, encoding=encoding)
-    result_list = []
-    client.retrlines(f'RETR {filename_on_server}',
-                     lambda row: list_writer(result_list, row))
-    client.close()
-    kopfsatz = retreive_header(result_list[0])
+    with open(protocol_file, mode='a') as log_file:
+        print(f"{str(datetime.now())} - Start Abholung Paxan-Artikeldatei", file=log_file)
+        client = FTP(host=host, user=user, passwd=password, encoding=encoding)
+        result_list = []
+        client.retrlines(f'RETR {filename_on_server}',
+                        lambda row: list_writer(result_list, row))
+        client.close()
+        kopfsatz = retreive_header(result_list[0])
 
-    now = datetime.now().strftime('%Y%m%d%H%M%S')
-    erstellung = kopfsatz['datum_abgabe'].strftime(
-        '%Y%m%d') + kopfsatz['uhrzeit_abgabe'].strftime('%H%M00')
+        now = datetime.now().strftime('%Y%m%d%H%M%S')
+        erstellung = kopfsatz['datum_abgabe'].strftime(
+            '%Y%m%d') + kopfsatz['uhrzeit_abgabe'].strftime('%H%M00')
 
-    filename = target_filename.replace('{retrievets}', f"{now}")
-    filename = filename.replace('{validts}', f"{erstellung}")
+        filename = target_filename.replace('{retrievets}', f"{now}")
+        filename = filename.replace('{validts}', f"{erstellung}")
 
-    with open(join(target_dir, filename), 'w') as file:
-        for line in result_list:
-            file.write(line + '\n')
+        with open(join(target_dir, filename), 'w') as file:
+            for line in result_list:
+                file.write(line + '\n')
 
-    print(f"{str(datetime.now())} - Fertig")
+        print(f"{str(datetime.now())} - Fertig", file=log_file)
 
 
 if __name__ == '__main__':

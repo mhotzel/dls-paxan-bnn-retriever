@@ -1,3 +1,4 @@
 **/pyenv
 config.ini
 **/data
+.DS_Store
