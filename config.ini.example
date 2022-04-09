@@ -1,0 +1,25 @@
+# Copy this file and fill it with the right values.
+# the file name must be 'config.ini'
+
+[DEFAULT]
+target_dir = data/in
+
+[paxan]
+# you get the credentials directly from paxan.
+host = <ftp-URL>
+user = <user>
+password = <passwd>
+
+# the encoding is usually CP437. Get the documentation from paxan.
+encoding = CP437
+
+# there are two files on the server:
+# PL.BNN (attention: case sensitive!) for the "normal articles
+# PLF.BNN for fresh articles (daily articles like vegetables)
+source_filename = PL.BNN
+
+# the file name for the target file:
+#   {retrievets} will be replaced by the date and time of the retrieval.
+#   {validts} will be replaced by the valid-from-date and valid-from-time 
+#             read from the first line in the retrieved file
+target_filename = pl_{retrievets}-{validts}.bnn
