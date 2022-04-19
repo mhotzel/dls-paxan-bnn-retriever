@@ -40,7 +40,7 @@ The file specification of the article file (you can get this document directly f
 - 'ansi'
 - 'ascii'
 
-that's why I have chosen "CP437" by default. It works for me.
+that's why I have chosen "CP850" by default. It works for me. The target files are written with utf-8 encoding
 
 *'source_filename':*
 'pax an' provides two files:

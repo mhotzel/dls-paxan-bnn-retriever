@@ -2,8 +2,8 @@
 # the file name must be 'config.ini'
 
 [DEFAULT]
-target_dir = data/in
-protocol_file = data/out/paxan-abholer.log
+target_dir = c:/data/in
+protocol_file = c:/data/ptk/paxan-abholer.log
 
 [paxan]
 # you get the credentials directly from paxan.
