@@ -7,9 +7,14 @@ You have to get a contract with the supplier if you want to get an account.
 
 The supplier **'Pax an'** regularly provides two article files available via FTP. These article files can be retrieved using this small program.
 
-The program downloads the file in text mode and writes it without any processing to the configured target directory. it reads the first line (header) of the file to get the valid-from-Date. It writes the file with the valid-from-date and the timestamp when it was retrieved to the target directory.
+The program downloads the file in text mode and writes it - transformed into a CSV file - to the configured target directory. It reads the first line (header) of the file to get the valid-from-Date. It writes the file with the valid-from-date and the timestamp in the name when it was retrieved to the target directory.
 
-It is your goal to process the file after retrieving.
+The following transformations are also done:
+
+  - write the first line at the beginning of each line
+  - remove the first and the last line from the file (header + footer)
+  - write a CSV Header with the column names
+  - encode the file as utf-8
 
 ## Requirements
 You need to install at least Python 3.9 on your machine.

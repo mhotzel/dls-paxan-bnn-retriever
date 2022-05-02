@@ -9,6 +9,7 @@ import logging
 LOGGING_FORMAT = '%(asctime)s - %(filename)s - %(levelname)s - %(funcName)s: %(message)s'
 LOGGING_DATEFORMAT = '%Y-%m-%d-%H.%M.%S'
 LOGGING_LEVEL = logging.INFO
+CSV_HEADER = 'Kennung;Version;Zeichensatz;Versenderadresse;Umfang;Inhalt;Preiswährung;DatumAb;DatumBis;Abgabedatum;Abgabezeit;Dateizähler;ArtikelNr;Änderungskennung;ÄnderungsDatum;ÄnderungsZeit;EANladen;EANbestell;Bezeichnung;Bezeichnung2;Bezeichnung3;Handelsklasse;Hersteller/Inverkehrbringer;Hersteller;Herkunft;Qualität;Kontrollstelle;MHD-Restlaufzeit;WG-BNN;WG-IfH;WG-GH;ErsatzArtikelNr;MinBestellMenge;Bestelleinheit;Bestelleinheits-Menge;Ladeneinheit;Mengenfaktor;Gewichtsartikel;PfandNrLadeneinheit;PfandNrBestelleinheit;GewichtLadeneinheit;GewichtBestelleinheit;Breite;Höhe;Tiefe;MwstKennung;VkFestpreis;EmpfVk;EmpfVkGH;Preis;rabattfähig;skontierfähig;StaffelMenge1;StaffelPreis1;rabattfähig1;skontierfähig1;StaffelMenge2;StaffelPreis2;rabattfähig2;skontierfähig2;StaffelMenge3;StaffelPreis3;rabattfähig3;skontierfähig3;StaffelMenge4;StaffelPreis4;rabattfähig4;skontierfähig4;StaffelMenge5;StaffelPreis5;rabattfähig5;skontierfähig5;Artikelart;Aktionspreis;AktionspreisGültigAb;AktionspreisGültigBis;empfVk-Aktion;Grundpreis-Einheit;Grundpreis-Faktor;LieferbarAb;LieferbarBis'
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +19,7 @@ def setup_logging(protocol_file: str):
         format=LOGGING_FORMAT,
         datefmt=LOGGING_DATEFORMAT,
         level=LOGGING_LEVEL,
+        encoding='utf-8',
         filename=protocol_file
     )
 
@@ -35,14 +37,14 @@ def retreive_header(first_row: str) -> dict:
         datum_abgabe = datetime.strptime(rlist[9], '%Y%m%d').date()
     except ValueError as ve:
         datum_abgabe = datetime.now().date()
-        logger.warn(f"Abgabedatum konnte nicht korrekt ermittelt werden")
+        logger.warning(f"Abgabedatum konnte nicht korrekt ermittelt werden")
 
     uhrzeit_abgabe: date = None
     try:
         uhrzeit_abgabe = datetime.strptime(rlist[10], '%H%M').time()
     except ValueError as ve:
         uhrzeit_abgabe = datetime.now().time()
-        logger.warn(f"Abgabeuhrzeit konnte nicht korrekt ermittelt werden")
+        logger.warning(f"Abgabeuhrzeit konnte nicht korrekt ermittelt werden")
 
     metaData = {
         'kennung': rlist[0],
@@ -83,27 +85,30 @@ def main() -> None:
     setup_logging(protocol_file)
 
     try:
-        with open(protocol_file, mode='a') as log_file:
-            logger.info(f"{str(datetime.now())} - Start Abholung Paxan-Artikeldatei")
-            client = FTP(host=host, user=user, passwd=password, encoding=encoding)
-            result_list = []
-            client.retrlines(f'RETR {filename_on_server}',
-                            lambda row: list_writer(result_list, row))
-            client.close()
-            kopfsatz = retreive_header(result_list[0])
+        logger.info(f"{str(datetime.now())} - Start Abholung Paxan-Artikeldatei")
+        client = FTP(host=host, user=user, passwd=password, encoding=encoding)
+        result_list = []
+        client.retrlines(f'RETR {filename_on_server}',
+                        lambda row: list_writer(result_list, row))
+        client.close()
+        kopfsatz = retreive_header(result_list[0])
 
-            now = datetime.now().strftime('%Y%m%d%H%M%S')
-            erstellung = kopfsatz['datum_abgabe'].strftime(
-                '%Y%m%d') + kopfsatz['uhrzeit_abgabe'].strftime('%H%M00')
+        now = datetime.now().strftime('%Y%m%d%H%M%S')
+        erstellung = kopfsatz['datum_abgabe'].strftime(
+            '%Y%m%d') + kopfsatz['uhrzeit_abgabe'].strftime('%H%M00')
 
-            filename = target_filename.replace('{retrievets}', f"{now}")
-            filename = filename.replace('{validts}', f"{erstellung}")
+        filename = target_filename.replace('{retrievets}', f"{now}")
+        filename = filename.replace('{validts}', f"{erstellung}")
 
-            with open(join(target_dir, filename), 'w', encoding='UTF-8') as file:
-                for line in result_list:
-                    file.write(line + '\n')
+        first_line = result_list[0]
+        result_list = result_list[1:-1]
 
-            logger.info(f"{str(datetime.now())} - Fertig")
+        with open(join(target_dir, filename), 'w', encoding='UTF-8') as file:
+            file.write(CSV_HEADER + '\n')
+            for line_nr, line in enumerate(result_list):
+                file.write(first_line + ";" + line + '\n')
+
+        logger.info(f"{str(datetime.now())} - Fertig")
     except Exception as e:
         logger.error(f'Fehler bei der Ausführung', exc_info=True)
         raise e

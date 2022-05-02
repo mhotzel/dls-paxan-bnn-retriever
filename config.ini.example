@@ -23,4 +23,4 @@ source_filename = PL.BNN
 #   {retrievets} will be replaced by the date and time of the retrieval.
 #   {validts} will be replaced by the valid-from-date and valid-from-time 
 #             read from the first line in the retrieved file
-target_filename = pl_{retrievets}-{validts}.bnn
+target_filename = pl_{retrievets}-{validts}.csv
