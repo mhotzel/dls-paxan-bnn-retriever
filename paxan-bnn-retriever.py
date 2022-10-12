@@ -19,7 +19,7 @@ def setup_logging(protocol_file: str):
         format=LOGGING_FORMAT,
         datefmt=LOGGING_DATEFORMAT,
         level=LOGGING_LEVEL,
-        encoding='utf-8',
+        #encoding='utf-8',
         filename=protocol_file
     )
 
@@ -86,7 +86,8 @@ def main() -> None:
 
     try:
         logger.info(f"{str(datetime.now())} - Start Abholung Paxan-Artikeldatei")
-        client = FTP(host=host, user=user, passwd=password, encoding=encoding)
+        client = FTP(host=host, user=user, passwd=password)
+        client.encoding = encoding
         result_list = []
         client.retrlines(f'RETR {filename_on_server}',
                         lambda row: list_writer(result_list, row))
